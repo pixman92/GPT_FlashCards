@@ -1,0 +1,43 @@
+users (collection)
+|
+└───userId (document)
+    │   name: string
+    │   email: string
+    │
+    └───decks (collection)
+        │
+        └───deckId (document)
+        │   │   name: string
+        │   │
+        │   └───cards (collection)
+        │       │
+        │       └───cardId (document)
+        │           │   question: string
+        │           │   answer: string
+        │           │
+        │           └───metadata
+        │               │   created_at: timestamp
+        │               │   updated_at: timestamp
+        │               │
+        │               └───tags (array)
+        │                   │   tag: string
+        │                   │
+        │                   │   ...
+        │
+        └───deckId (document)
+            │   name: string
+            │
+            └───cards (collection)
+                │
+                └───cardId (document)
+                    │   question: string
+                    │   answer: string
+                    │
+                    └───metadata
+                        │   created_at: timestamp
+                        │   updated_at: timestamp
+                        │
+                        └───tags (array)
+                            │   tag: string
+                            │
+                            │   ...
