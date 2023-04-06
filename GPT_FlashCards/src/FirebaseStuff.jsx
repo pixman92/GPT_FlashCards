@@ -5,7 +5,17 @@
 // test comment
 
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDoc, getDocs, doc, query, where,  } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDoc,
+  getDocs,
+  doc,
+  query,
+  where,
+  updateDoc,
+} from "firebase/firestore";
 import { useState } from "react";
 
 function MyFirebaseFunctions() {
@@ -23,11 +33,53 @@ function MyFirebaseFunctions() {
   const db = getFirestore(app);
   // const db = firebase.firestore();
 
+  // ======================
+  function generateUniqueId() {
+    // Generate a random number between 0 and 999999999999
+    const randomNumber = Math.floor(Math.random() * 1000000000000);
+
+    // Convert the random number to a string and pad it with leading zeros until it has 12 digits
+    const paddedNumber = randomNumber.toString().padStart(12, "0");
+
+    return paddedNumber;
+  }
+  // ======================
+
+  const getAllDecksForUser = async (userId) => {
+    // Get a reference to the user's profile document
+    // const profileRef = doc(db, "users", userId);
+
+    const deckRef = doc(db, "users", userId);
+    const cardsCollectionRef = collection(deckRef, "decks");
   
+    console.log(cardsCollectionRef);
+
+    // ======================
+
+    // Retrieve the list of deck IDs from the user's profile document
+    // const profileDoc = await getDoc(profileRef);
+    // const deckIds = profileDoc.data().id;
+
+    // debugger;
+
+    // const profileRef2 = doc(db, 'users', userId)
+    // // Retrieve the deck documents using the list of deck IDs
+    // const deckRefs = deckIds.map((deckId) => doc(db, "decks", deckId));
+    // const deckDocs = await getDocs(collection(db, "decks"));
+
+    // // Extract the deck data from the deck documents and return it as an array
+    // const decks = deckDocs.map((deckDoc) => ({
+    //   id: deckDoc.id,
+    //   ...deckDoc.data(),
+    // }));
+    // return decks;
+  }
+
+  // this function works
   const createUser = async (name, email) => {
     try {
       debugger;
-      const docRef = await addDoc(collection(db, 'users'), {
+      const docRef = await addDoc(collection(db, "users"), {
         first: name,
         email: email,
         decks: {},
@@ -38,18 +90,27 @@ function MyFirebaseFunctions() {
     }
   };
 
+  // this function works
   const updateUserName = async (userId, newName) => {
     try {
-      await db.collection("users").doc(userId).update({ name: newName });
+      // Get a reference to the document you want to update
+      const docRef = doc(db, "users", userId);
+      // Update the field with a new value
+      await updateDoc(docRef, { name: newName });
+
       console.log("User name updated successfully");
     } catch (error) {
       console.error("Error updating user name: ", error);
     }
   };
 
+  // should work - untested
   const updateUserEmail = async (userId, newEmail) => {
     try {
-      await db.collection("users").doc(userId).update({ email: newEmail });
+      // Get a reference to the document you want to update
+      const docRef = doc(db, "users", userId);
+      // Update the field with a new value
+      await updateDoc(docRef, { email: newEmail });
       console.log("User email updated successfully");
     } catch (error) {
       console.error("Error updating user email: ", error);
@@ -58,19 +119,22 @@ function MyFirebaseFunctions() {
 
   const createDeck = async (userId, deckName) => {
     try {
-      const deckRef = await db
-        .collection("users")
-        .doc(userId)
-        .collection("decks")
-        .add({
-          name: deckName,
-          cards: {},
-        });
-      console.log("Deck created successfully with ID: ", deckRef.id);
+      const docRef = await addDoc(collection(db, "users", userId, "decks"), {
+        nameOfDeck: deckName,
+        cards: {},
+        id: generateUniqueId(),
+      });
+      console.log("Deck created successfully with ID: ", docRef.id);
     } catch (error) {
       console.error("Error creating deck: ", error);
     }
   };
+
+  // const getDec = async (userId) =>{
+  //   try{
+  //     const docRef = await addDoc()
+  //   }
+  // }
 
   const updateDeckName = async (userId, deckId, newName) => {
     try {
@@ -136,41 +200,38 @@ function MyFirebaseFunctions() {
     }
   };
 
+  // ======================
   const [text, setText] = useState("");
 
   function handleTextChange(event) {
     setText(event.target.value);
   }
-
-  const whereEmail = (email)=>{
+  // ======================
+  const whereEmail = (email) => {
     const collectionRef = collection(db, "users");
     const q = query(collectionRef, where("email", "==", email));
 
     const docIds = [];
 
-    getDocs(q)
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          docIds.push(doc.id);
-        });
-        console.log(docIds); // an array of document IDs for matching documents
+    getDocs(q).then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        docIds.push(doc.id);
       });
-    getDocs(q)
-      .then((querySnapshot) => {
-          debugger;
-        const documents = querySnapshot.doc.map((doc) => {
-          doc.data();
-        });
-        console.log(documents); // an array of matching documents
+      console.log(docIds); // an array of document IDs for matching documents
+    });
+    getDocs(q).then((querySnapshot) => {
+      // debugger;
+      const documents = querySnapshot.docs.map((doc) => {
+        doc.data();
       });
-      // .catch((error) => {
-      //   console.log("Error getting documents:", error);
-      // });
+      console.log(documents); // an array of matching documents
+    });
+    // .catch((error) => {
+    //   console.log("Error getting documents:", error);
+    // });
+  };
 
-
-  }
-
-  const getID = () =>{
+  const getID = () => {
     const docRef = doc(db, "users");
 
     getDoc(docRef)
@@ -193,33 +254,47 @@ function MyFirebaseFunctions() {
       .catch((error) => {
         console.log("Error getting document:", error);
       });
-
-  }
+  };
 
   return (
     <div>
       <textarea value={text} onChange={handleTextChange} />
-      <button onClick={()=>{
-        let parsed = text.split(" ");
+      <button
+        onClick={() => {
+          let parsed = text.split(" ");
 
-        if(parsed[0] == 'db')
-          console.log('db', db);
+          if (parsed[0] == "whereEmail") {
+            whereEmail(parsed[1]);
+          }
 
-        if(parsed[0]=="createUser"){
-          createUser(parsed[1], parsed[2]);
-        }
+          if (parsed[0] == "db") console.log("db", db);
 
-        if(parsed[0] == 'getID'){
-          getID();
-        }
+          if (parsed[0] == "createUser") {
+            createUser(parsed[1], parsed[2]);
+          }
 
-        if(parsed[0] == 'whereEmail'){
-          whereEmail(parsed[1]);
-        }
+          if (parsed[0] == "getID") {
+            getID();
+          }
 
-      }}>Submit</button>
+          if (parsed[0] == "updateUserName") {
+            updateUserName(parsed[1], parsed[2]);
+          }
+          if (parsed[0] == "createDeck") {
+            createDeck(parsed[1], parsed[2]);
+          }
+          if (parsed[0] == 'getAllDecksForUser'){
+            getAllDecksForUser(parsed[1])
+          }
+        }}
+      >
+        Submit
+      </button>
       <div>
-      whereEmail sam@gmail.com
+        whereEmail sam@gmail.com
+        <div>updateUserName r1IprRhUAPBQA0zmORp7 tim</div>
+        {/* <div>createDeck r1IprRhUAPBQA0zmORp7 beach</div> */}
+        getAllDecksForUser r1IprRhUAPBQA0zmORp7
       </div>
     </div>
   );
