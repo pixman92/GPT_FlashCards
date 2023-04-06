@@ -51,8 +51,13 @@ function MyFirebaseFunctions() {
 
     const deckRef = doc(db, "users", userId);
     const cardsCollectionRef = collection(deckRef, "decks");
-  
-    console.log(cardsCollectionRef);
+ 
+    const querySnapshot = await getDocs(cardsCollectionRef);
+    const data = querySnapshot.docs.map(doc => doc.data());
+
+
+
+    console.log(data);
 
     // ======================
 
@@ -117,6 +122,7 @@ function MyFirebaseFunctions() {
     }
   };
 
+  // should work - untested
   const createDeck = async (userId, deckName) => {
     try {
       const docRef = await addDoc(collection(db, "users", userId, "decks"), {
