@@ -2,10 +2,10 @@
 // import {firestore} from "@firebase/firestore";
 // import "firebase/firestore";
 
-
 // test comment
+
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDoc, getDocs, doc, query, where,  } from "firebase/firestore";
 import { useState } from "react";
 
 function MyFirebaseFunctions() {
@@ -29,13 +29,9 @@ function MyFirebaseFunctions() {
       debugger;
       const docRef = await addDoc(collection(db, 'users'), {
         first: name,
-        email: email
+        email: email,
+        decks: {},
       });
-      // await db.collection("users").add({
-      //   name: name,
-      //   email: email,
-      //   decks: {},
-      // });
       console.log("User created successfully", docRef.id);
     } catch (error) {
       console.error("Error creating user: ", error);
@@ -146,6 +142,60 @@ function MyFirebaseFunctions() {
     setText(event.target.value);
   }
 
+  const whereEmail = (email)=>{
+    const collectionRef = collection(db, "users");
+    const q = query(collectionRef, where("email", "==", email));
+
+    const docIds = [];
+
+    getDocs(q)
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          docIds.push(doc.id);
+        });
+        console.log(docIds); // an array of document IDs for matching documents
+      });
+    getDocs(q)
+      .then((querySnapshot) => {
+          debugger;
+        const documents = querySnapshot.doc.map((doc) => {
+          doc.data();
+        });
+        console.log(documents); // an array of matching documents
+      });
+      // .catch((error) => {
+      //   console.log("Error getting documents:", error);
+      // });
+
+
+  }
+
+  const getID = () =>{
+    const docRef = doc(db, "users");
+
+    getDoc(docRef)
+      .then((doc) => {
+        if (doc.exists()) {
+          const data = doc.data();
+          const ids = [];
+
+          for (const [field, value] of Object.entries(data)) {
+            if (typeof value === "object" && value.id) {
+              ids.push(value.id);
+            }
+          }
+
+          console.log(ids); // an array of connecting IDs
+        } else {
+          console.log("No such document!");
+        }
+      })
+      .catch((error) => {
+        console.log("Error getting document:", error);
+      });
+
+  }
+
   return (
     <div>
       <textarea value={text} onChange={handleTextChange} />
@@ -158,7 +208,19 @@ function MyFirebaseFunctions() {
         if(parsed[0]=="createUser"){
           createUser(parsed[1], parsed[2]);
         }
+
+        if(parsed[0] == 'getID'){
+          getID();
+        }
+
+        if(parsed[0] == 'whereEmail'){
+          whereEmail(parsed[1]);
+        }
+
       }}>Submit</button>
+      <div>
+      whereEmail sam@gmail.com
+      </div>
     </div>
   );
 }
