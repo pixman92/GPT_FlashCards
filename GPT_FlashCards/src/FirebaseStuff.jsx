@@ -275,13 +275,13 @@ function MyFirebaseFunctions() {
 
           if (parsed[0] == "getID") {
             getID();
-          }
+          } 
 
           if (parsed[0] == "updateUserName") {
             updateUserName(parsed[1], parsed[2]);
           }
           if (parsed[0] == "createDeck") {
-            createDeck(parsed[1], parsed[2]);
+            createDeck(parsed[1], parsed[2]); 
           }
           if (parsed[0] == 'getAllDecksForUser'){
             getAllDecksForUser(parsed[1])
