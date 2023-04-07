@@ -34,6 +34,10 @@ function MyFirebaseFunctions() {
   // const db = firebase.firestore();
 
   // ======================
+
+  const [deckIds, setDeckIds] = useState([]);
+
+  // ======================  
   function generateUniqueId() {
     // Generate a random number between 0 and 999999999999
     const randomNumber = Math.floor(Math.random() * 1000000000000);
@@ -45,6 +49,7 @@ function MyFirebaseFunctions() {
   }
   // ======================
 
+  // this function works - somewhat tested (no edge cases, so far)
   const getAllDecksForUser = async (userId) => {
     // Get a reference to the user's profile document
     // const profileRef = doc(db, "users", userId);
@@ -55,29 +60,16 @@ function MyFirebaseFunctions() {
     const querySnapshot = await getDocs(cardsCollectionRef);
     const data = querySnapshot.docs.map(doc => doc.data());
 
+    const deckIdsArr=[]; 
+    const data2 = querySnapshot.forEach((doc) => {
+      deckIdsArr.push(doc);
+    });
 
+    setDeckIds('hello');
 
     console.log(data);
-
-    // ======================
-
-    // Retrieve the list of deck IDs from the user's profile document
-    // const profileDoc = await getDoc(profileRef);
-    // const deckIds = profileDoc.data().id;
-
-    // debugger;
-
-    // const profileRef2 = doc(db, 'users', userId)
-    // // Retrieve the deck documents using the list of deck IDs
-    // const deckRefs = deckIds.map((deckId) => doc(db, "decks", deckId));
-    // const deckDocs = await getDocs(collection(db, "decks"));
-
-    // // Extract the deck data from the deck documents and return it as an array
-    // const decks = deckDocs.map((deckDoc) => ({
-    //   id: deckDoc.id,
-    //   ...deckDoc.data(),
-    // }));
-    // return decks;
+    console.log(deckIds)
+    debugger;
   }
 
   // this function works
