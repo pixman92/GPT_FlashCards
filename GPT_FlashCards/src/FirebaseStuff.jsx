@@ -16,9 +16,9 @@ import {
   where,
   updateDoc,
 } from "firebase/firestore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-function MyFirebaseFunctions() {
+function FirebaseStuff() {
   const firebaseConfig = {
     // Firebase config goes here
     apiKey: "AIzaSyANM6e546I_F3L-zWMX8glAwlLmlkilZ_k",
@@ -35,9 +35,9 @@ function MyFirebaseFunctions() {
 
   // ======================
 
-  const [deckIds, setDeckIds] = useState([]);
+  // const [deckIds, setdeckIds] = useState(['test']);
 
-  // ======================  
+  // ======================
   function generateUniqueId() {
     // Generate a random number between 0 and 999999999999
     const randomNumber = Math.floor(Math.random() * 1000000000000);
@@ -49,28 +49,19 @@ function MyFirebaseFunctions() {
   }
   // ======================
 
-  // this function works - somewhat tested (no edge cases, so far)
-  const getAllDecksForUser = async (userId) => {
-    // Get a reference to the user's profile document
-    // const profileRef = doc(db, "users", userId);
+  const [decks, setDecks] = useState([]);
 
-    const deckRef = doc(db, "users", userId);
-    const cardsCollectionRef = collection(deckRef, "decks");
- 
-    const querySnapshot = await getDocs(cardsCollectionRef);
-    const data = querySnapshot.docs.map(doc => doc.data());
-
-    const deckIdsArr=[]; 
-    const data2 = querySnapshot.forEach((doc) => {
-      deckIdsArr.push(doc);
-    });
-
-    setDeckIds('hello');
-
-    console.log(data);
-    console.log(deckIds)
-    debugger;
-  }
+  // this function works
+  const getAllDecksForUser = async () => {
+    // const db = getFirestore();
+    const decksRef = collection(db, "users", "r1IprRhUAPBQA0zmORp7", "decks");
+    const deckSnapshot = await getDocs(decksRef);
+    const deckData = deckSnapshot.docs.map((doc) => doc.data());
+    console.log(deckData);
+    setDecks(deckData);
+    // debugger;
+  };
+  // ======================
 
   // this function works
   const createUser = async (name, email) => {
@@ -93,7 +84,9 @@ function MyFirebaseFunctions() {
       // Get a reference to the document you want to update
       const docRef = doc(db, "users", userId);
       // Update the field with a new value
-      await updateDoc(docRef, { name: newName });
+      await updateDoc(docRef, {
+        name: newName,
+      });
 
       console.log("User name updated successfully");
     } catch (error) {
@@ -107,7 +100,9 @@ function MyFirebaseFunctions() {
       // Get a reference to the document you want to update
       const docRef = doc(db, "users", userId);
       // Update the field with a new value
-      await updateDoc(docRef, { email: newEmail });
+      await updateDoc(docRef, {
+        email: newEmail,
+      });
       console.log("User email updated successfully");
     } catch (error) {
       console.error("Error updating user email: ", error);
@@ -141,7 +136,9 @@ function MyFirebaseFunctions() {
         .doc(userId)
         .collection("decks")
         .doc(deckId)
-        .update({ name: newName });
+        .update({
+          name: newName,
+        });
       console.log("Deck name updated successfully");
     } catch (error) {
       console.error("Error updating deck name: ", error);
@@ -175,7 +172,9 @@ function MyFirebaseFunctions() {
         .doc(deckId)
         .collection("cards")
         .doc(cardId)
-        .update({ question: newQuestion });
+        .update({
+          question: newQuestion,
+        });
       console.log("Card question updated successfully");
     } catch (error) {
       console.error("Error updating card question: ", error);
@@ -191,7 +190,9 @@ function MyFirebaseFunctions() {
         .doc(deckId)
         .collection("cards")
         .doc(cardId)
-        .update({ answer: newAnswer });
+        .update({
+          answer: newAnswer,
+        });
       console.log("Card answer updated successfully");
     } catch (error) {
       console.error("Error updating card answer: ", error);
@@ -273,26 +274,26 @@ function MyFirebaseFunctions() {
 
           if (parsed[0] == "getID") {
             getID();
-          } 
+          }
 
           if (parsed[0] == "updateUserName") {
             updateUserName(parsed[1], parsed[2]);
           }
           if (parsed[0] == "createDeck") {
-            createDeck(parsed[1], parsed[2]); 
+            createDeck(parsed[1], parsed[2]);
           }
-          if (parsed[0] == 'getAllDecksForUser'){
-            getAllDecksForUser(parsed[1])
+          if (parsed[0] == "getAllDecksForUser") {
+            getAllDecksForUser();
           }
         }}
       >
         Submit
       </button>
       <div>
-        whereEmail sam@gmail.com
-        <div>updateUserName r1IprRhUAPBQA0zmORp7 tim</div>
-        {/* <div>createDeck r1IprRhUAPBQA0zmORp7 beach</div> */}
-        getAllDecksForUser r1IprRhUAPBQA0zmORp7
+        whereEmail sam @gmail.com
+        <div> updateUserName r1IprRhUAPBQA0zmORp7 tim </div>
+        <div>createDeck r1IprRhUAPBQA0zmORp7 beach</div>
+        <div>getAllDecksForUser r1IprRhUAPBQA0zmORp7</div>
       </div>
     </div>
   );
@@ -300,7 +301,7 @@ function MyFirebaseFunctions() {
 
 // createUser('sam', 'sam@gmail.com')
 
-export default MyFirebaseFunctions;
+export default FirebaseStuff;
 
 // const instance = ReactTestUtils.renderIntoDocument(<MyComponent />);
 // instance.myFunction();
